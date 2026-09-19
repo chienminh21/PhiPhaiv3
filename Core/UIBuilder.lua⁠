@@ -6,9 +6,6 @@ local TeleportService = game:GetService("TeleportService")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
--- =========================================================
--- PHÂN NHÓM GAME THEO PLACE ID (Tự động Hiện/Ẩn Tab & Nút)
--- =========================================================
 local AutoFarm_Games = {
     [111894976456494] = true, -- Anime Life
 }
@@ -22,11 +19,8 @@ local function isGameInList(list)
     return list[game.PlaceId] == true
 end
 
--- =========================================================
--- HÀM DỰNG GIAO DIỆN CHÍNH
--- =========================================================
 function UIBuilder.Build(Window)
-    -- 1. TAB AUTO FARM (Chỉ hiện ở các game trong danh sách AutoFarm_Games)
+    -- tab farm
     if isGameInList(AutoFarm_Games) then
         local FarmTab = Window:Tab({ Title = "Farm", Icon = "sparkles" })
         local FarmSec = FarmTab:Section({ Title = "Auto Farm Options", Opened = true })
@@ -40,13 +34,13 @@ function UIBuilder.Build(Window)
         })
     end
 
-    -- 2. TAB COMBAT / VISUALS (Chỉ hiện ở các game trong danh sách ESP_Games)
+ 
     if isGameInList(ESP_Games) then
         local CombatTab = Window:Tab({ Title = "Combat & Visuals", Icon = "sword" })
         local CombatSec = CombatTab:Section({ Title = "ESP Options", Opened = true })
 
         CombatSec:Toggle({
-            Title = "Player ESP / Tracer",
+            Title = "Player ESP",
             Value = false,
             Callback = function(v)
                 print("ESP State:", v)
@@ -54,10 +48,10 @@ function UIBuilder.Build(Window)
         })
     end
 
-    -- 3. TAB MISC (Tự động hiện ở MỌI GAME)
+
     local MiscTab = Window:Tab({ Title = "Misc", Icon = "wrench" })
 
-    -- Section: Local Player
+    -- Section Local Player
     local PlayerSec = MiscTab:Section({ Title = "Local Player", Opened = true })
     PlayerSec:Slider({
         Title = "Walk Speed",
@@ -80,7 +74,7 @@ function UIBuilder.Build(Window)
         end
     })
 
-    -- Section: Server & Utilities
+    -- Section Server
     local ServerSec = MiscTab:Section({ Title = "Server & Utilities", Opened = false })
     ServerSec:Button({
         Title = "Rejoin Server",
@@ -99,7 +93,7 @@ function UIBuilder.Build(Window)
         end
     })
 
-    -- 4. TAB DISCORD (Luôn ở dưới cùng)
+    --  dis.gg tab
     local DiscordTab = Window:Tab({ Title = "Discord", Icon = "message-circle" })
     local DiscordSec = DiscordTab:Section({ Title = "Community", Opened = true })
     DiscordSec:Button({
