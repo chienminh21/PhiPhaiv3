@@ -1,1 +1,221 @@
+-- Trong file Core/UIBuilder.lua
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+function UIBuilder.Build(Window)
+    -- ... [Các Tab Farm, Combat của bạn ở trên] ...
+
+    -- =========================================================
+    -- TAB: MISC (Tự động có mặt trên MỌI GAME)
+    -- =========================================================
+    local MiscTab = Window:Tab({ Title = "Misc", Icon = "wrench" })
+
+    ------------------------------------------------------------
+    -- 1. SECTION: LOCAL PLAYER (Cấu hình nhân vật)
+    ------------------------------------------------------------
+    local PlayerSec = MiscTab:Section({ Title = "Local Player", Opened = true })
+
+    -- WalkSpeed
+    PlayerSec:Slider({
+        Title = "Walk Speed",
+        Value = { Default = 16, Min = 16, Max = 300 },
+        Callback = function(v)
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                LocalPlayer.Character.Humanoid.WalkSpeed = v
+            end
+        end
+    })
+
+    -- JumpPower
+    PlayerSec:Slider({
+        Title = "Jump Power",
+        Value = { Default = 50, Min = 50, Max = 400 },
+        Callback = function(v)
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                LocalPlayer.Character.Humanoid.UseJumpPower = true
+                LocalPlayer.Character.Humanoid.JumpPower = v
+            end
+        end
+    })
+
+    -- Noclip (Đi xuyên tường)
+    local noclipConnection
+    PlayerSec:Toggle({
+        Title = "Noclip (Xuyên tường)",
+        Value = false,
+        Callback = function(state)
+            if state then
+                noclipConnection = RunService.Stepped:Connect(function()
+                    if LocalPlayer.Character then
+                        for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.CanCollide = false
+                            end
+                        end
+                    end
+                end)
+            else
+                if noclipConnection then
+                    noclipConnection:Disconnect()
+                    noclipConnection = nil
+                end
+            end
+        end
+    })
+
+    -- Infinite Jump (Nhảy trên không)
+    local infJumpConnection
+    PlayerSec:Toggle({
+        Title = "Infinite Jump",
+        Value = false,
+        Callback = function(state)
+            if state then
+                infJumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+                    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+                    end
+                end)
+            else
+                if infJumpConnection then
+                    infJumpConnection:Disconnect()
+                    infJumpConnection = nil
+                end
+            end
+        end
+    })
+
+    ------------------------------------------------------------
+    -- 2. SECTION: SERVER & UTILS (Tiện ích máy chủ)
+    ------------------------------------------------------------
+    local ServerSec = MiscTab:Section({ Title = "Server & Game Utilities", Opened = false })
+
+    -- Rejoin Server
+    ServerSec:Button({
+        Title = "Rejoin Server",
+        Callback = function()
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+        end
+    })
+
+    -- Server Hop (Chuyển sang Server khác)
+    ServerSec:Button({
+        Title = "Server Hop (Đổi Server)",
+        Callback = function()
+            -- Gọi API tìm server trống hoặc dùng TeleportService đơn giản
+            TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        end
+    })
+
+    -- Copy Job ID
+    ServerSec:Button({
+        Title = "Copy JobId / Server Code",
+        Callback = function()
+            if setclipboard then
+                setclipboard(game.JobId)
+                Window:Notify({ Title = "Misc", Content = "Đã copy JobId vào bộ nhớ tạm!", Duration = 2 })
+            end
+        end
+    })
+
+    -- Anti AFK (Tránh bị văng game sau 20 phút)
+    ServerSec:Toggle({
+        Title = "Anti-AFK",
+        Value = true,
+        Callback = function(state)
+            if state then
+                local VirtualUser = game:GetService("VirtualUser")
+                LocalPlayer.Idled:Connect(function()
+                    VirtualUser:CaptureController()
+                    VirtualUser:ClickButton2(Vector2.new())
+                end)
+            end
+        end
+    })
+
+    ------------------------------------------------------------
+    -- 3. SECTION: PERFORMANCE (Tối ưu / Anti-Lag)
+    ------------------------------------------------------------
+    local PerfSec = MiscTab:Section({ Title = "Performance (Anti-Lag)", Opened = false })
+
+    PerfSec:Button({
+        Title = "Boost FPS / Low Graphics",
+        Callback = function()
+            pcall(function()
+                local Terrain = workspace:FindFirstChildOfClass("Terrain")
+                if Terrain then
+                    Terrain.WaterWaveSize = 0
+                    Terrain.WaterWaveSpeed = 0
+                    Terrain.WaterReflectance = 0
+                    Terrain.WaterTransparency = 0
+                end
+                game:GetService("Lighting").GlobalShadows = false
+                for _, v in ipairs(game:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.Material = Enum.Material.SmoothPlastic
+                    elseif v:IsA("Decal") or v:IsA("Texture") then
+                        v:Destroy()
+                    end
+                end
+            end)
+            Window:Notify({ Title = "Anti-Lag", Content = "Đã giảm đồ họa để tăng FPS!", Duration = 3 })
+        end
+    })
+
+    -- =========================================================
+    -- TAB DISCORD (Luôn để ở cuối)
+    -- =========================================================
+    -- ... [Đoạn DiscordTab của bạn] ...
+local DiscordTab = Window:Tab({
+    Title = "Discord",
+    Icon = "rbxassetid://97506778710114", 
+})
+
+local DiscordSection = DiscordTab:Section({
+    Title = "Community"
+})
+
+
+local Player = game.Players.LocalPlayer
+local accountAge = Player.AccountAge .. " days"
+local avatarImage = "rbxthumb://type=AvatarHeadShot&id=" .. Player.UserId .. "&w=420&h=420"
+
+DiscordSection:Paragraph({
+    Title = "Hello, " .. Player.DisplayName,
+    Desc = "Executor: " .. (identifyexecutor and identifyexecutor() or "Unknown") .. "\nAccount Age: " .. accountAge .. "\nUserID: " .. Player.UserId .. "\nStatus: " .. (Player.MembershipType == Enum.MembershipType.Premium and "Premium" or "Normal"),
+    Image = avatarImage,
+    ImageSize = 80
+})
+
+
+
+DiscordSection:Button({
+    Title = "Copy Discord Invite",
+    Desc = "GA key in Discord",
+    Icon = "message-circle-more",
+    IconAlign = "Left",
+    Color = Color3.fromRGB(0, 0, 0),
+    Justify = "Between",
+
+    Callback = function()
+        local link = "https://discord.gg/6y7TpYTBkW"
+
+        if setclipboard then
+            setclipboard(link)
+        elseif toclipboard then
+            toclipboard(link)
+        end
+
+        Window:Notify({
+            Title = "Discord",
+            Content = "Invite link copied to clipboard!",
+            Duration = 3
+        })
+    end
+})
+
+end
+
+return UIBuilder
 
