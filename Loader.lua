@@ -1,4 +1,4 @@
--- File: Loader.lua
+--  Loader.lua
 local PlaceId = game.PlaceId
 local baseUrl = "https://raw.githubusercontent.com/chienminh21/PhiPhaiv3/refs/heads/main/"
 
@@ -12,7 +12,7 @@ local GamesMap = {
 local scriptPath = GamesMap[PlaceId] or "Games/Universal.lua"
 local fullUrl = baseUrl .. scriptPath
 
--- Tải nội dung file từ GitHub
+-- load file
 local ok, content = pcall(function()
     return game:HttpGet(fullUrl)
 end)
@@ -22,12 +22,12 @@ if not ok or not content or content == "404: Not Found" then
     return
 end
 
--- Biên dịch code
+-- check code
 local func, err = loadstring(content)
 if not func then
-    warn("[PhiPhai v3] Lỗi cú pháp trong file (" .. scriptPath .. "):", err)
+    warn("[PhiPhai v3] error file (" .. scriptPath .. "):", err)
     return
 end
 
--- Chạy script
+-- load
 func()
