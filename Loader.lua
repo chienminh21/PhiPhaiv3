@@ -1,7 +1,8 @@
 -- File: Loader.lua
 local PlaceId = game.PlaceId
--- Thay "Tên_GitHub_Của_Bạn" và "Tên_Repo_Của_Bạn" vào đây:
-local baseUrl = "https://raw.githubusercontent.com/Tên_GitHub_Của_Bạn/Tên_Repo_Của_Bạn/main/"
+-- 
+local baseUrl = "local baseUrl = "https://raw.githubusercontent.com/chienminh21/PhiPhaiv3/refs/heads/main/"
+"
 
 -- Bảng ánh xạ PlaceID -> File game tương ứng
 local GamesMap = {
